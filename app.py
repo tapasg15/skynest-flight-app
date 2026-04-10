@@ -6,7 +6,6 @@ import pandas as pd
 from datetime import datetime
 import random
 import google.generativeai as genai
-from google.generativeai import types
 import time
 import string
 import numpy as np
