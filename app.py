@@ -5,8 +5,8 @@ import pickle
 import pandas as pd
 from datetime import datetime
 import random
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai import types
 import time
 import string
 import numpy as np
