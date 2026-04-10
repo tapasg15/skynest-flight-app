@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyNest | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0A2463; --bg: #F4F7F9; --white: #FFFFFF; --text-main: #111111; --text-muted: #666666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { display: flex; background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+        h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--primary); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
+        .sidebar .brand { font-size: 24px; font-weight: 700; margin-bottom: 40px; font-family: 'Outfit'; }
+        .sidebar a { color: #A0AEC0; text-decoration: none; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; font-weight: 500; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); color: white; }
+        .sidebar .logout { margin-top: auto; color: #FC8181; }
+
+        /* Loading Spinner Animation */
+@keyframes spin { 
+    100% { transform: rotate(360deg); } 
+}
+
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; }
+
+        /* Stat Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
+        .stat-card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #EBECEF; }
+        .stat-card h3 { font-size: 14px; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card .value { font-size: 32px; font-weight: 700; color: var(--primary); }
+
+        /* Layout Grid for Form & Table */
+        .dashboard-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+
+        /* Add Flight Form */
+        .form-card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #EBECEF; }
+        .form-card h2 { font-size: 20px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #EBECEF; border-radius: 8px; font-family: 'Plus Jakarta Sans'; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); }
+        .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background: #1A3A8A; }
+
+        /* Flights Table */
+        .table-card { background: var(--white); padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #EBECEF; }
+        .table-card h2 { font-size: 20px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #EBECEF; font-size: 14px; }
+        th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+        
+        .status-select { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: 600; cursor: pointer; outline: none; font-family: 'Plus Jakarta Sans'; }
+        .status-select.On-Time { background: #e3fbe3; color: #2d7a2d; border-color: #2d7a2d; }
+        .status-select.Delayed { background: #fbe3e3; color: #d83a3a; border-color: #d83a3a; }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand">✈️ SkyNest Admin</div>
+        <a href="/" class="active">Dashboard</a>
+        <a href="/">← Back to Live Site</a>
+        <a href="#" onclick="performRealisticLogout(event)" class="logout-btn" style="color: #ef4444; font-weight: 600; text-decoration: none; padding: 10px;">
+            🚪 Logout
+        </a>    
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Command Center</h1>
+            <p style="color: var(--text-muted);">Welcome back, {{ session.get('user_name').split()[0] }}</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><h3>Total Flights</h3><div class="value" id="stat-flights">--</div></div>
+            <div class="stat-card"><h3>Active Users</h3><div class="value" id="stat-users">--</div></div>
+            <div class="stat-card"><h3>Total Revenue</h3><div class="value" id="stat-rev">--</div></div>
+        </div>
+
+        <div class="dashboard-layout">
+            <div class="form-card">
+                <h2>➕ Add New Flight</h2>
+                <form id="addFlightForm">
+                    <div class="input-group">
+                        <label>Flight Number</label>
+                        <input type="text" id="f_num" required placeholder="e.g. IND105">
+                    </div>
+                    <div class="input-group">
+                        <label>Origin</label>
+                        <input type="text" id="f_origin" required placeholder="e.g. Mumbai">
+                    </div>
+                    <div class="input-group">
+                        <label>Destination</label>
+                        <input type="text" id="f_dest" required placeholder="e.g. Delhi">
+                    </div>
+                    <div class="input-group">
+                        <label>Departure Date & Time</label>
+                        <input type="datetime-local" id="f_time" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Price (₹)</label>
+                        <input type="number" id="f_price" required placeholder="4500">
+                    </div>
+                    <button type="submit" class="btn-submit">Dispatch Flight</button>
+                </form>
+            </div>
+
+            <div class="table-card">
+                <h2>📡 Live Flight Board</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Flight</th>
+                            <th>Route</th>
+                            <th>Departure</th>
+                            <th>Price</th>
+                            <th>Status Override</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-flight-table">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load Stats
+        fetch('/api/admin/stats').then(res => res.json()).then(data => {
+            document.getElementById('stat-flights').innerText = data.total_flights;
+            document.getElementById('stat-users').innerText = data.total_users;
+            document.getElementById('stat-rev').innerText = data.revenue;
+        });
+
+        // Load Flights Table
+        function loadFlights() {
+            fetch('/api/flights').then(res => res.json()).then(data => {
+                const tbody = document.getElementById('admin-flight-table');
+                tbody.innerHTML = '';
+                data.forEach(flight => {
+                    const dateObj = new Date(flight.departure_time);
+                    const formattedDate = dateObj.toLocaleDateString('en-GB') + " " + dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                    
+                    // Dropdown for Status Override
+                    const selectHTML = `
+                        <select class="status-select ${flight.status.replace(' ', '-')}" onchange="updateStatus(${flight.id}, this.value, this)">
+                            <option value="On Time" ${flight.status === 'On Time' ? 'selected' : ''}>On Time</option>
+                            <option value="Delayed" ${flight.status === 'Delayed' ? 'selected' : ''}>Delayed</option>
+                            <option value="Cancelled" ${flight.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    `;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight:600;">${flight.flight_number}</td>
+                            <td>${flight.origin} ➝ ${flight.destination}</td>
+                            <td>${formattedDate}</td>
+                            <td>₹${flight.price}</td>
+                            <td>${selectHTML}</td>
+                            <td><button onclick="deleteFlight(${flight.id})" style="background: #fee2e2; color: #dc2626; border: 1px solid #f87171; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-left: 10px; transition: 0.2s;" onmouseover="this.style.background='#fca5a5'" onmouseout="this.style.background='#fee2e2'">
+    🗑️ Delete
+</button></td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+        loadFlights();
+
+        // Update Status Live
+        function updateStatus(flightId, newStatus, selectElement) {
+            fetch('/api/admin/update_status', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ flight_id: flightId, status: newStatus })
+            }).then(res => res.json()).then(data => {
+                if(data.success) {
+                    selectElement.className = `status-select ${newStatus.replace(' ', '-')}`;
+                    alert('✅ Flight status updated successfully!');
+                }
+            });
+        }
+
+        // Add New Flight
+        document.getElementById('addFlightForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('/api/admin/add_flight', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    flight_number: document.getElementById('f_num').value,
+                    origin: document.getElementById('f_origin').value,
+                    destination: document.getElementById('f_dest').value,
+                    departure_time: document.getElementById('f_time').value,
+                    price: document.getElementById('f_price').value
+                })
+            }).then(res => res.json()).then(data => {
+                if(data.success) {
+                    alert('✈️ ' + data.message);
+                    document.getElementById('addFlightForm').reset();
+                    loadFlights(); // Reload table instantly
+                }
+            });
+        });
+
+// --- DELETE FLIGHT LOGIC ---
+    function deleteFlight(flightId) {
+        if(confirm("⚠️ Are you sure you want to delete this flight?")) {
+            fetch(`/api/delete_flight/${flightId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    alert("✅ " + data.message);
+                    location.reload(); // Page refresh karega
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Something went wrong!");
+            });
+        }
+    }
+
+  // --- REALISTIC LOGOUT LOGIC ---
+    function performRealisticLogout(event) {
+        // Agar tag <a> hai toh use turant doosre page par jane se roko
+        if(event) event.preventDefault(); 
+        
+        // Overlay ko screen par dikhao (flex use karenge taaki center mein aaye)
+        document.getElementById('logoutOverlay').style.display = 'flex';
+        
+        // 1.5 seconds ka professional delay
+        setTimeout(() => {
+            // Delay ke baad asli logout route par bhej do
+            // Note: Agar aapka logout route kuch aur hai (jaise /api/logout), toh use yahan likhein
+            window.location.href = '/logout'; 
+        }, 1500);
+    }
+
+    </script>
+
+    <div id="logoutOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
+        
+        <div style="width: 60px; height: 60px; border: 4px solid #f1f5f9; border-top: 4px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+        
+        <h2 style="color: #0A2463; font-family: 'Outfit'; margin-bottom: 10px;">Logging Out...</h2>
+        <p style="color: #64748b; font-size: 15px; font-weight: 500;">Securing your session and clearing data.</p>
+    </div>
+
+</body>
+</html>

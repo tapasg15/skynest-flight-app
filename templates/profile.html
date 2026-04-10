@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile & Bookings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0A2463; --accent-blue: #3E92CC; --bg-color: #F4F7F6;
+            --card-bg: #FFFFFF; --text-dark: #1E1E24; --text-light: #717C89;
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-dark); margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .dashboard-container { width: 100%; max-width: 1000px; animation: slideUpFade 0.8s ease-out forwards; }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        h1 { margin: 0; color: var(--primary-blue); font-weight: 600; letter-spacing: -0.5px; }
+        .back-btn { background-color: transparent; color: var(--primary-blue); border: 2px solid var(--primary-blue); text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; }
+        .back-btn:hover { background-color: var(--primary-blue); color: white; }
+        .table-wrapper { background: var(--card-bg); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px;}
+        th { color: var(--text-light); padding: 15px; font-weight: 600; text-transform: uppercase; font-size: 13px; border-bottom: 2px solid #EBECEF; }
+        td { padding: 15px; border-bottom: 1px solid #EBECEF; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        .cancel-btn { background-color: #FFF0F0; color: #D83A3A; border: 1px solid #D83A3A; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+        .cancel-btn:hover { background-color: #D83A3A; color: white; }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-light); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>My Bookings</h1>
+            <a href="/" class="back-btn">← Back to Flights</a>
+        </div>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flight No.</th>
+                        <th>Route</th>
+                        <th>Departure</th>
+                        <th>Price</th>
+                        <th>Booked On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="bookings-table-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Fetch user's bookings on page load
+        function loadBookings() {
+            fetch('/api/my_bookings')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('bookings-table-body');
+                    tableBody.innerHTML = ''; // Clear existing
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="6" class="empty-state">You have no upcoming flights. Time to book a trip! ✈️</td></tr>`;
+                        return;
+                    }
+
+                    data.forEach(booking => {
+                        const depDate = new Date(booking.departure_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+                        const bookDate = new Date(booking.booking_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+                        const row = `<tr>
+                            <td style="font-weight: 600;">${booking.flight_number}</td>
+                            <td>${booking.origin} → ${booking.destination}</td>
+                            <td>${depDate}</td>
+                            <td>₹${booking.price}</td>
+                            <td>${bookDate}</td>
+                            <td>
+                                <button class="cancel-btn" onclick="cancelBooking(${booking.booking_id})">Cancel</button>
+                            </td>
+                        </tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                });
+        }
+
+        // Cancel a booking
+        function cancelBooking(bookingId) {
+            if (!confirm("Are you sure you want to cancel this flight?")) return;
+
+            fetch('/api/cancel_booking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ booking_id: bookingId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                loadBookings(); // Reload the table instantly!
+            });
+        }
+
+        // Initialize
+        loadBookings();
+    </script>
+</body>
+</html>

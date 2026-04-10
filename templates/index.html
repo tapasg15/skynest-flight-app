@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyNest | Book Smarter, Travel Further</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- GLOBAL VARIABLES & RESET --- */
+        :root {
+            --primary: #0A2463; --secondary: #3E92CC; --accent: #FF3366;
+            --dark: #111111; --light-bg: #F8F9FA; --blue-accent: #DCEAF5;
+            --text-gray: #666666; --white: #FFFFFF; --border-radius: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Apply Plus Jakarta Sans to the whole body for clean UI */
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--light-bg); color: var(--dark); overflow-x: hidden; }
+        
+        /* Apply Outfit to all Headings, Brand, and big numbers for that "Cool" factor */
+        h1, h2, h3, h4, .brand, .field-main, .hero h1, .btn-search-large, .card-price { 
+            font-family: 'Outfit', sans-serif; 
+        }
+        
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- NAVBAR --- */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: var(--white); position: relative; z-index: 100; }
+        .brand { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .nav-links { display: flex; gap: 30px; font-size: 14px; font-weight: 500; color: var(--text-gray); }
+        .nav-links a:hover { color: var(--dark); }
+        
+        /* UPDATED: Reduced gap and added white-space: nowrap to prevent text breaking */
+        .auth-controls { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+        .profile-btn { display: flex; align-items: center; gap: 5px; background: var(--light-bg); padding: 8px 15px; border-radius: 30px; transition: 0.3s; white-space: nowrap; }
+        .profile-btn:hover { background: #e2e6ea; }
+        .profile-link { font-weight: 600; color: var(--primary); background: #F0F4F8; padding: 8px 16px; border-radius: 20px; transition: 0.3s; white-space: nowrap; }
+        .profile-link:hover { background: var(--secondary); color: white; }
+
+        /* --- HERO SECTION --- */
+        .hero { padding: 60px 5% 150px; background: linear-gradient(180deg, var(--white) 0%, #E8F0F6 100%); display: flex; flex-direction: column; align-items: flex-start; position: relative; overflow: hidden; }
+        .hero-content { max-width: 600px; position: relative; z-index: 2; }
+        .hero h1 { font-size: 4.5rem; font-weight: 900; line-height: 1.05; margin-bottom: 20px; text-transform: uppercase; letter-spacing: -2px; }        .hero p { font-size: 1.2rem; font-weight: 500; color: var(--text-gray); margin-bottom: 30px; }
+        .hero-image { position: absolute; right: -5%; top: 10%; width: 55%; z-index: 1; pointer-events: none;}
+
+        /* --- ADVANCED SEARCH WIDGET --- */
+        .search-widget-container { padding: 0 5%; margin-top: -100px; position: relative; z-index: 10; max-width: 1300px; margin-left: auto; margin-right: auto;}
+        .advanced-search-widget { background: var(--white); border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; }
+        .search-tabs { display: flex; background: #F4F7F9; }
+        .s-tab { padding: 18px 30px; border: none; background: transparent; font-family: 'Poppins'; font-size: 15px; font-weight: 600; color: var(--text-gray); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .s-tab.active { background: var(--white); color: var(--primary); box-shadow: 0 -3px 0 var(--primary) inset; }
+        .widget-body { padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+        .trip-options { display: flex; justify-content: space-between; align-items: center; }
+        .radio-group { display: flex; gap: 20px; }
+        .radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--dark); }
+        .radio-label input[type="radio"] { accent-color: var(--primary); transform: scale(1.2); cursor: pointer; }
+        .currency-selector { font-size: 14px; font-weight: 600; color: var(--dark); cursor: pointer; background: var(--light-bg); padding: 5px 12px; border-radius: 6px;}
+
+        .search-input-row { display: flex; border: 1px solid #EBECEF; border-radius: 12px; position: relative; background: var(--white); }
+        .field-group { flex: 1; padding: 15px 20px; border-right: 1px solid #EBECEF; display: flex; flex-direction: column; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .field-group:hover { background: #F8FAFC; }
+        .field-group:last-child { border-right: none; }
+        .to-field { padding-left: 45px; } /* Pushes the text right to clear the button */
+        .field-label { font-size: 13px; font-weight: 600; color: var(--text-gray); display: flex; align-items: center; gap: 5px; }
+        .field-main { font-size: 28px; font-weight: 700; color: var(--dark); margin: 4px 0; border: none; outline: none; background: transparent; width: 100%; font-family: 'Poppins'; }
+        .field-sub { font-size: 12px; font-weight: 500; color: var(--text-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .swap-btn { position: absolute; left: 24%; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: var(--white); border: 1px solid #EBECEF; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: var(--primary); font-size: 18px; cursor: pointer; z-index: 2; transition: 0.3s; }
+        .swap-btn:hover { background: var(--light-bg); transform: translateY(-50%) scale(1.1); }
+        
+
+        .widget-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .special-fares { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .fare-tag { font-size: 12px; font-weight: 500; padding: 6px 12px; border: 1px solid #EBECEF; border-radius: 20px; cursor: pointer; transition: 0.2s; background: var(--light-bg); }
+        .fare-tag:hover { border-color: var(--primary); background: #F0F4F8; }
+        .btn-search-large { background: var(--primary); color: var(--white); font-family: 'Poppins'; font-size: 18px; font-weight: 700; border: none; padding: 15px 50px; border-radius: 30px; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(10, 36, 99, 0.25); }
+        .btn-search-large:hover { background: var(--secondary); transform: translateY(-2px); box-shadow: 0 12px 25px rgba(62, 146, 204, 0.3); }
+
+        /* --- DYNAMIC FLIGHTS GRID --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .section-header { text-align: left; margin: 60px 0 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .section-header h2 { font-size: 2rem; font-weight: 700; margin-bottom: 5px; }
+        
+        .deals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px;}
+        .deal-card { background: var(--white); border-radius: var(--border-radius); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: 0.3s; display: flex; flex-direction: column; border: 1px solid #EBECEF;}
+        .deal-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .card-img { width: 100%; height: 200px; object-fit: cover; }
+        .card-content { padding: 25px; display: flex; flex-direction: column; flex-grow: 1; }
+        .card-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card-title-row h3 { font-size: 1.5rem; font-weight: 700; }
+        .card-price { font-size: 1.2rem; font-weight: 700; color: var(--dark); }
+        .flight-details { font-size: 13px; color: var(--text-gray); margin-bottom: 20px; line-height: 1.6; }
+        .flight-details span { display: block; color: var(--dark); font-weight: 500; }
+        
+        .ai-zone { background: #f0fdf4; padding: 12px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #dcfce7; }
+        .ai-btn { background: transparent; color: #166534; border: 1px solid #166534; padding: 4px 10px; border-radius: 6px; font-family: 'Poppins'; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;}
+        .ai-btn:hover { background: #166534; color: white; }
+        .prediction-result { font-size: 13px; font-weight: 600; margin-left: 10px; }
+        .btn-learn { background: #00D2FF; color: var(--dark); text-align: center; padding: 12px; border-radius: 30px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; font-family: 'Poppins'; font-size: 14px; width: 100%; margin-top: auto;}
+        .btn-learn:hover { background: #00bced; transform: scale(1.02); }
+
+        /* --- NEW: TRENDING CITIES SLIDER --- */
+        .trending-box { background: var(--white); border-radius: 24px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); margin-bottom: 60px; }
+        .scroll-row { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px; scroll-behavior: smooth; }
+        .scroll-row::-webkit-scrollbar { display: none; } /* Hide scrollbar for clean look */
+        
+        .trending-card {
+            min-width: 180px; height: 260px; border-radius: 16px; position: relative;
+            background-size: cover; background-position: center; overflow: hidden;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .trending-card:hover { transform: translateY(-8px); }
+        .trending-card::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+        }
+        .trending-card h4 { position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; color: white; font-size: 18px; font-weight: 600; z-index: 2; }
+
+        /* --- NEW: DESTINATION CIRCLES --- */
+        .circles-row { display: flex; gap: 30px; overflow-x: auto; padding: 10px 0 30px; scroll-behavior: smooth; }
+        .circles-row::-webkit-scrollbar { display: none; }
+        
+        .circle-item { display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: 0.3s; min-width: 90px;}
+        .circle-item:hover { transform: translateY(-5px); }
+        .circle-img-wrapper {
+            width: 100px; height: 100px; border-radius: 50%; padding: 4px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            position: relative; box-shadow: 0 8px 15px rgba(10, 36, 99, 0.2);
+        }
+        .circle-img-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--white); }
+        .badge-new { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; border: 2px solid var(--white); z-index: 2; }
+        .circle-item span { font-weight: 600; font-size: 15px; color: var(--dark); }
+
+        /* Navigation Arrows */
+        .nav-arrows button { background: var(--light-bg); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; cursor: pointer; transition: 0.2s; color: var(--primary);}
+        .nav-arrows button:hover { background: var(--primary); color: white; }
+
+        /* Payment Tabs CSS */
+        .pay-tab { background: transparent; border: none; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: #64748b; transition: 0.3s; font-family: 'Plus Jakarta Sans'; }
+        .pay-tab.active { background: white; color: #0A2463; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .pay-section { animation: fadeIn 0.3s ease; }
+
+        /* --- ABOUT & FOOTER --- */
+        .about-section { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin: 80px 5%; max-width: 1200px; margin-left: auto; margin-right: auto;}
+        .about-text h2 { font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; }
+        .about-text p { color: var(--text-gray); line-height: 1.8; margin-bottom: 15px; }
+        .about-img { width: 100%; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+
+        .footer { background: var(--white); padding: 60px 5% 20px; margin-top: 100px; border-top-left-radius: 40px; border-top-right-radius: 40px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; max-width: 1200px; margin-left: auto; margin-right: auto;}
+        .footer h4 { font-size: 18px; margin-bottom: 20px; font-weight: 700; }
+        .footer ul li { margin-bottom: 12px; color: var(--text-gray); font-size: 14px; }
+        .footer-watermark { text-align: center; font-size: 5vw; font-weight: 800; color: rgba(0,0,0,0.03); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
+
+        /* --- LOADING SPINNER FOR LOGOUT --- */
+        .profile-btn.loading { color: transparent !important; pointer-events: none; position: relative; }
+        .profile-btn.loading::after {
+            content: ""; position: absolute; width: 16px; height: 16px;
+            top: 0; left: 0; right: 0; bottom: 0; margin: auto;
+            border: 2px solid rgba(216, 58, 58, 0.2); /* Light red track */
+            border-top-color: #d83a3a; /* Solid red spinner */
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 1024px) {
+            .search-input-row { flex-direction: column; }
+            .field-group { border-right: none; border-bottom: 1px solid #EBECEF; padding: 15px; }
+            .swap-btn { left: auto; right: 20px; top: 22%; transform: rotate(90deg); }
+            .to-field { padding-left: 15px; } /* Resets for mobile */
+}
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; } 
+            .hero h1 { font-size: 2.5rem; }
+            .hero-image { display: none; } 
+            .about-section { grid-template-columns: 1fr; text-align: center; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">✈️ SkyNest</div>
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Flights</a></li>
+            <li><a href="#">Packages</a></li>
+            <li><a href="#">Support</a></li>
+            {% if session.get('user_role') == 'admin' %}
+            <li><a href="/admin" style="color: #0a2463; font-weight: 600;">Admin Panel</a></li>
+            {% endif %}
+        </ul>
+        <div class="auth-controls">
+            {% if session.get('user_id') %}
+            <a href="/profile" class="profile-link">👋 {{ session.get('user_name').split()[0] }}'s Trips</a>
+<a href="#" onclick="performRealisticLogout(event)" class="logout-btn" style="color: #ef4444; font-weight: 600; text-decoration: none; padding: 10px;">
+    🚪 Logout
+</a>            {% else %}
+                <a href="/auth" class="profile-btn" style="background: var(--primary); color: white;">Sign in</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Book Smarter,<br>Travel Further</h1>
+            <p>Your next destination is just a click away. Experience premium travel with AI-powered insights.</p>
+        </div>
+        <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80" alt="Airplane" class="hero-image" style="mask-image: linear-gradient(to left, black 50%, transparent 100%); -webkit-mask-image: linear-gradient(to left, black 50%, transparent 100%);">
+    </section>
+
+    <div class="search-widget-container">
+        <div class="advanced-search-widget">
+            <div class="search-tabs">
+                <button class="s-tab active">✈️ Flights</button>
+                <button class="s-tab">🏨 Hotels</button>
+                <button class="s-tab">🌴 Packages</button>
+            </div>
+            <div class="widget-body">
+                <div class="trip-options">
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="trip" checked> One Way</label>
+                        <label class="radio-label"><input type="radio" name="trip"> Round Trip</label>
+                        <label class="radio-label"><input type="radio" name="trip"> Multi City</label>
+                    </div>
+                    <div class="currency-selector">₹ INR ⌄</div>
+                </div>
+                <div class="search-input-row">
+                    <div class="field-group">
+                        <span class="field-label">From</span>
+                        <input type="text" id="searchFrom" placeholder="Delhi, DEL" class="field-main">
+                        <span class="field-sub">Indira Gandhi International Airport</span>
+                    </div>
+                    <div class="swap-btn">⇄</div>
+                    <div class="field-group to-field">
+    <span class="field-label">To</span>
+    <input type="text" id="searchTo" placeholder="Going to?" class="field-main">
+    <span class="field-sub">Search by city or airport</span>
+</div>
+                    <div style="padding: 10px 15px; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center;">
+    <label style="font-size: 13px; color: #64748b; margin-bottom: 2px;">Departure <i class="fas fa-chevron-down" style="font-size: 10px;"></i></label>
+    <input type="date" name="departure_date" required style="width: 100%; border: none; font-size: 22px; font-weight: 800; color: #000; outline: none; background: transparent; cursor: pointer; padding: 0; font-family: 'Outfit', sans-serif;">
+    <span style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Select date</span>
+</div>
+                    <div style="padding: 10px 15px; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center;">
+    <label style="font-size: 13px; color: #64748b; margin-bottom: 2px;">Return <i class="fas fa-chevron-down" style="font-size: 10px;"></i></label>
+    <input type="date" name="return_date" style="width: 100%; border: none; font-size: 22px; font-weight: 800; color: #000; outline: none; background: transparent; cursor: pointer; padding: 0; font-family: 'Outfit', sans-serif;">
+    <span style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Tap to add date</span>
+</div>
+                    <div style="padding: 10px 15px; display: flex; flex-direction: column; justify-content: center;">
+          <label style="font-size: 13px; color: #64748b; margin-bottom: 2px;">Travellers & Class <i class="fas fa-chevron-down" style="font-size: 10px;"></i></label>
+         <select name="passengers" style="width: 100%; border: none; font-size: 22px; font-weight: 800; color: #000; outline: none; background: transparent; cursor: pointer; padding: 0; font-family: 'Outfit', sans-serif; appearance: none;">
+        <option value="1">1 Passenger</option>
+        <option value="2">2 Passengers</option>
+        <option value="3">3 Passengers</option>
+        <option value="4">4 Passengers</option>
+        <option value="5">5 Passengers</option>
+         </select>
+             <span style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Economy/Premium Economy</span>
+              </div>
+                </div>
+                <div class="widget-footer">
+                    <div class="special-fares">
+                        <span class="fare-tag">Student <b>Offer</b></span>
+                        <span class="fare-tag">Family & Friends <b>Offer</b></span>
+                    </div>
+                    <button class="btn-search-large" onclick="searchFlights()">SEARCH FLIGHTS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="deals" class="container">
+        <div class="section-header">
+            <div>
+                <h2>Live Flight Board</h2>
+                <p>Real-time availability and AI delay predictions.</p>
+            </div>
+        </div>
+        <div class="deals-grid" id="flight-grid">
+            </div>
+    </div>
+
+    <div class="container">
+        <div class="trending-box">
+            <div class="section-header" style="margin-top: 0;">
+                <h2>Trending Sight Seeing Cities - <span style="color: #166534;">50%* off</span></h2>
+                <div class="nav-arrows"><button onclick="document.getElementById('trendScroll').scrollBy(-200, 0)">❮</button> <button onclick="document.getElementById('trendScroll').scrollBy(200, 0)">❯</button></div>
+            </div>
+            <div class="scroll-row" id="trendScroll">
+                <div class="trending-card" style="background-image: url('https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400');"><h4>Jaipur</h4></div>
+                <div class="trending-card" style="background-image: url('https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=400');"><h4>Singapore</h4></div>
+                <div class="trending-card" style="background-image: url('https://i.pinimg.com/736x/47/dc/bf/47dcbf64ee9ceca1652be1d1f0e94b3f.jpg');"><h4>Phuket</h4></div>
+                <div class="trending-card" style="background-image: url('https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=400');"><h4>Goa</h4></div>
+                <div class="trending-card" style="background-image: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400');"><h4>Ho Chi Minh</h4></div>
+                <div class="trending-card" style="background-image: url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400');"><h4>Dubai</h4></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section-header">
+            <h2>New Destinations</h2>
+            <div class="nav-arrows"><button onclick="document.getElementById('circleScroll').scrollBy(-150, 0)">❮</button> <button onclick="document.getElementById('circleScroll').scrollBy(150, 0)">❯</button></div>
+        </div>
+        <div class="circles-row" id="circleScroll">
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://images.unsplash.com/photo-1603565816030-6b389eeb23cb?w=200"><span class="badge-new">New</span></div><span>Athens</span></div>
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://i.pinimg.com/736x/09/5b/8e/095b8ee076db57da275b35f26cd7b762.jpg"><span class="badge-new">New</span></div><span>London</span></div>
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://i.pinimg.com/736x/52/95/18/529518b793509be1ffe7bcadeb9d08cf.jpg"><span class="badge-new">New</span></div><span>Guangzhou</span></div>
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://i.pinimg.com/736x/07/2e/e6/072ee6c3c9cae3a72f68f70a9aad7a06.jpg"></div><span>Amsterdam</span></div>
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://i.pinimg.com/736x/c4/3a/13/c43a13cbae224ff7cee2dedcecf85272.jpg"></div><span>Manchester</span></div>
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://images.unsplash.com/photo-1518684079-3c830dcef090?w=200"></div><span>Fujairah</span></div>
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=200"></div><span>Krabi</span></div>
+            <div class="circle-item"><div class="circle-img-wrapper"><img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=200"></div><span>Paris</span></div>
+        </div>
+    </div>
+
+
+<div class="container" style="margin-bottom: 80px; margin-top: 40px;">
+        <div class="section-header">
+            <div>
+                <h2>💸 Smart Budget Optimizer</h2>
+                <p>Set your budget and let AI find the best value deals for you.</p>
+            </div>
+        </div>
+        
+        <div style="background: var(--white); border-radius: 24px; padding: 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); border: 1px solid #EBECEF;">
+            
+            <div style="flex: 1; min-width: 300px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;">
+                    <span style="font-weight: 600; color: var(--text-gray); font-size: 16px;">Set Max Budget:</span>
+                    <span id="budgetValue" style="font-size: 32px; font-weight: 800; color: var(--primary); font-family: 'Outfit';">₹5000</span>
+                </div>
+                
+                <input type="range" id="budgetSlider" min="2000" max="10000" step="500" value="5000" oninput="updateBudgetText(this.value)" style="width: 100%; cursor: pointer; accent-color: var(--primary); margin-bottom: 10px;">
+                
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #aaa; font-weight: 600; margin-bottom: 30px;">
+                    <span>₹2000</span>
+                    <span>₹10,000+</span>
+                </div>
+
+                <button onclick="findBudgetDeals()" style="width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: 'Poppins'; font-size: 16px; box-shadow: 0 8px 20px rgba(10, 36, 99, 0.2);">
+                    🔍 FIND BUDGET DEALS
+                </button>
+            </div>
+
+            <div style="flex: 1; min-width: 300px; display: flex; justify-content: center;">
+                <div style="background: #f8fafc; padding: 20px; border-radius: 20px; width: 100%; border: 1px dashed #cbd5e1; text-align: center; color: #64748b;">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🎒</div>
+                    <h4 style="font-family: 'Outfit'; margin-bottom: 5px; color: #0A2463;">Travel More, Spend Less</h4>
+                    <p style="font-size: 13px;">Our smart algorithm filters out overpriced flights so you only see what's worth your money.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="deals-grid" id="budget-grid" style="margin-top: 40px;"></div>
+    </div>
+
+
+    <section class="about-section">
+        <div class="about-text">
+            <h2>About Us</h2>
+            <p>At SkyNest Travels, we believe travel isn't just about visiting places; it's about creating unforgettable experiences. From sun-kissed beaches to iconic landmarks, we design seamless journeys tailored to your dreams.</p>
+        </div>
+        <img src="https://images.unsplash.com/photo-1540962351504-03099e0a754b?auto=format&fit=crop&w=800&q=80" alt="Private Jet" class="about-img">
+    </section>
+
+  <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; width: 100%; max-width: 450px; border-radius: 20px; padding: 0; box-shadow: 0 25px 50px rgba(0,0,0,0.2); position: relative; overflow: hidden; animation: slideUp 0.3s ease;">
+            
+            <div style="background: #0A2463; color: white; padding: 25px 30px; position: relative;">
+                <button onclick="closePayment()" style="position: absolute; right: 20px; top: 20px; background: rgba(255,255,255,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">✕</button>
+                <h2 style="margin-bottom: 5px; font-family: 'Outfit';">Secure Checkout</h2>
+                <p style="opacity: 0.8; font-size: 14px;">Total Amount: <strong id="payAmount" style="font-size: 18px; color: #00D2FF;">₹0</strong></p>
+            </div>
+
+            <div style="padding: 30px;">
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <label style="font-size: 13px; font-weight: 700; color: #0A2463; display: block; margin-bottom: 8px;">✨ AI Smart Seat Preference</label>
+                    <select id="seatPref" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-family: 'Plus Jakarta Sans'; outline: none; background: white;">
+                        <option value="any">Surprise Me! (Any Seat)</option>
+                        <option value="window">🪟 Window Seat (A/F)</option>
+                        <option value="aisle">🚶‍♂️ Aisle Seat (C/D)</option>
+                        <option value="middle">🧍 Middle Seat (B/E)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 5px; margin-bottom: 20px; background: #f1f5f9; padding: 5px; border-radius: 12px;">
+                    <button onclick="switchTab('upi')" class="pay-tab active" id="tab-upi" style="flex: 1;">UPI</button>
+                    <button onclick="switchTab('card')" class="pay-tab" id="tab-card" style="flex: 1;">Card</button>
+                    <button onclick="switchTab('net')" class="pay-tab" id="tab-net" style="flex: 1;">Net Banking</button>
+                </div>
+
+                <div id="upi-section" class="pay-section">
+                    <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Enter UPI ID</label>
+                    <input type="text" placeholder="example@okicici" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-family: monospace; font-size: 14px;">
+                    <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center;">
+                        <span style="font-size: 12px; color: #888;">🔒 Encrypted & Secure connection</span>
+                    </div>
+                </div>
+
+                <div id="card-section" class="pay-section" style="display:none;">
+                    <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Card Number</label>
+                    <input type="text" placeholder="4111 1111 1111 1111" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 15px; font-family: monospace;">
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Expiry</label>
+                            <input type="text" placeholder="MM/YY" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">CVV</label>
+                            <input type="password" placeholder="***" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px;" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="net-section" class="pay-section" style="display:none;">
+                    <label style="font-size: 12px; font-weight: 600; color: #666; display: block; margin-bottom: 5px;">Select Bank</label>
+                    <select style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Plus Jakarta Sans';">
+                        <option>State Bank of India (SBI)</option>
+                        <option>HDFC Bank</option>
+                        <option>ICICI Bank</option>
+                        <option>Axis Bank</option>
+                        <option>Kotak Mahindra Bank</option>
+                    </select>
+                </div>
+
+                <button id="payBtn" onclick="processPayment()" style="width: 100%; background: #0A2463; color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; margin-top: 25px; cursor: pointer; font-size: 16px; font-family: 'Poppins'; transition: 0.3s;">
+                    Confirm & Pay
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style> @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } </style>
+
+      <button id="chatbotBtn" onclick="toggleChat()" style="position: fixed; bottom: 30px; right: 30px; background: #0A2463; color: white; width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 28px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); cursor: pointer; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 0.3s;">
+        ✈️
+    </button>
+
+    <div id="chatbotWindow" style="display: none; position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px; background: white; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); z-index: 9999; flex-direction: column; overflow: hidden; font-family: 'Plus Jakarta Sans', sans-serif; border: 1px solid #EBECEF;">
+        
+        <div style="background: linear-gradient(135deg, #0A2463, #3E92CC); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; font-family: 'Outfit'; font-size: 18px; display: flex; align-items: center; gap: 8px;">🤖 SkyBot <span style="width:8px; height:8px; background:#4ade80; border-radius:50%; display:inline-block;"></span></h3>
+                <p style="margin: 0; font-size: 12px; opacity: 0.8; margin-top: 2px;">Ask about flights & weather</p>
+            </div>
+            <button onclick="toggleChat()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">×</button>
+        </div>
+
+        <div id="chatMessages" style="flex: 1; padding: 20px; overflow-y: auto; background: #F8FAFC; display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: white; padding: 12px 15px; border-radius: 15px; border-bottom-left-radius: 2px; max-width: 85%; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); color: #333; align-self: flex-start; border: 1px solid #EBECEF;">
+                Hi there! I'm SkyBot. Need help with flights, weather, or tickets?
+            </div>
+        </div>
+
+        <div style="padding: 15px; background: white; border-top: 1px solid #EBECEF; display: flex; gap: 10px;">
+            <input type="text" id="chatInput" placeholder="Type your question..." onkeypress="if(event.key === 'Enter') sendMessage()" style="flex: 1; padding: 12px 15px; border: 1px solid #EBECEF; border-radius: 25px; outline: none; font-size: 14px; background: #F4F7F9;">
+            <button onclick="sendMessage()" style="background: #0A2463; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div><div class="brand" style="margin-bottom: 20px;">✈️ SkyNest</div><p style="color: var(--text-gray); font-size: 14px;">Follow us on social media for the latest travel updates.</p></div>
+            <div><h4>Travel</h4><ul><li>Asia</li><li>Europe</li><li>Australia</li></ul></div>
+            <div><h4>Company</h4><ul><li>About Us</li><li>Packages</li><li>Contact Us</li></ul></div>
+            <div><h4>Extra Links</h4><ul><li>Customer Support</li><li>Privacy Policy</li></ul></div>
+        </div>
+        <div class="footer-watermark">Fly Far. Pay Less. Travel Better</div>
+    </footer>
+
+   
+    <script>
+        const isLoggedIn = {{ 'true' if session.get('user_id') else 'false' }};
+
+        function getDestinationImage(destination) {
+            const destLower = destination.toLowerCase();
+            if(destLower.includes('mumbai')) return 'https://i.pinimg.com/736x/a5/d8/60/a5d860fa10d8f8e3ac56a703f4b40e28.jpg';
+            if(destLower.includes('delhi')) return 'https://i.pinimg.com/736x/13/33/ea/1333eac0a6d82dec34e1b2392f33bbbc.jpg';
+            if(destLower.includes('goa')) return 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=600&q=80';
+            if(destLower.includes('bangalore')) return 'https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&w=600&q=80';
+            if(destLower.includes('hyderabad')) return 'https://in.pinterest.com/pin/25825397856869091/';
+            if(destLower.includes('kolkata')) return 'https://i.pinimg.com/736x/06/28/95/062895a3817cb72567c1fe4abf5e8787.jpg';
+            if(destLower.includes('indore')) return 'https://i.pinimg.com/736x/7c/a8/47/7ca8472e991c400faa3016e274592c41.jpg';
+            if(destLower.includes('ranchi')) return 'https://i.pinimg.com/1200x/cb/cc/c4/cbccc4fda8a5a7dd9ae3db7f334c153d.jpg';
+            if(destLower.includes('varanasi')) return 'https://i.pinimg.com/736x/d5/52/7c/d5527cb84cc7109e6964d63ff3c55263.jpg';
+            if(destLower.includes('indore')) return 'https://i.pinimg.com/736x/7e/ee/8a/7eee8a5d9504b3e95c30f5a2297dadd6.jpg';
+
+
+            return 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80';
+        }
+
+        fetch('/api/flights')
+            .then(response => response.json())
+            .then(data => {
+                const grid = document.getElementById('flight-grid');
+                data.forEach(flight => {
+                    const dateObj = new Date(flight.departure_time);
+                    const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                    const formattedTime = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                    const imgUrl = getDestinationImage(flight.destination);
+
+                    const bookButtonHTML = isLoggedIn 
+                        ? `<button class="btn-learn" onclick="openPayment(${flight.id}, ${flight.price})">Reserve Now</button>`
+                        : `<button class="btn-learn" style="background: var(--light-bg); color: var(--text-gray);" onclick="window.location.href='/auth'">Sign In to Book</button>`;
+
+                    const cardHTML = `
+                    <div class="deal-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <img src="${imgUrl}" alt="${flight.destination}" class="card-img" style="width: 100%; height: 200px; object-fit: cover;">
+                        
+                        <div class="card-content" style="padding: 25px;">
+                            <div class="card-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="margin: 0; font-size: 24px; color: #0A2463;">${flight.destination}</h3>
+                                <span class="card-price" style="font-weight: bold; font-size: 18px; color: #333;">₹${flight.price}</span>
+                            </div>
+                                <div class="flight-details">
+                                    Flight ${flight.flight_number} • ${flight.status}
+                                    <span>From ${flight.origin}</span>
+                                    <span>📅 ${formattedDate} at 🕒 ${formattedTime}</span>
+                                </div>
+                                <div class="ai-zone">
+                                    <button class="ai-btn" onclick="askAI('${flight.flight_number}', '${flight.origin}', '${flight.destination}', '${flight.departure_time}')">✨ Ask AI Delay Predictor</button>
+                                    <span id="result-${flight.flight_number}" class="prediction-result"></span>
+                                </div>
+                                ${bookButtonHTML}
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += cardHTML;
+                });
+            });
+
+        function askAI(flightNo, origin, destination, departureTime) {
+            const resultSpan = document.getElementById(`result-${flightNo}`);
+            resultSpan.innerText = "Analyzing..."; resultSpan.style.color = "#666";
+            const flightHour = new Date(departureTime).getHours();
+
+            fetch('/api/predict', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ origin, destination, hour: flightHour })
+            })
+            .then(res => res.json())
+            .then(data => {
+                resultSpan.innerText = data.prediction;
+                resultSpan.style.color = data.prediction === "Delayed" ? "#D83A3A" : "#166534";
+            }).catch(() => { resultSpan.innerText = "Error"; resultSpan.style.color = "#D83A3A"; });
+        }
+
+
+
+// --- PAYMENT LOGIC ---
+    let selectedFlightId = null;
+
+    function openPayment(flightId, price) {
+        selectedFlightId = flightId;
+        document.getElementById('payAmount').innerText = '₹' + price;
+        document.getElementById('paymentModal').style.display = 'flex';
+    }
+
+    function closePayment() {
+        document.getElementById('paymentModal').style.display = 'none';
+        document.getElementById('payBtn').innerText = 'Pay Now & Book';
+        document.getElementById('payBtn').style.opacity = '1';
+        document.getElementById('payBtn').style.pointerEvents = 'auto';
+        document.getElementById('payBtn').style.background = '#0A2463';
+    }
+
+    function processPayment() {
+        // 1. Data save kar lo (Kyunki hum UI change karne wale hain)
+        const pref = document.getElementById('seatPref').value;
+        const amount = document.getElementById('payAmount').innerText;
+        
+        // Check karo kaunsa tab active hai
+        const isUPI = document.getElementById('tab-upi').classList.contains('active');
+        const isCard = document.getElementById('tab-card').classList.contains('active');
+
+        // Payment button wale pure div (modal body) ko select karo
+        const modalBody = document.getElementById('payBtn').parentElement;
+
+        // 2. Realistic message set karo
+        let message = "";
+        if (isUPI) {
+            message = `📱 Please open your <b>UPI App (GPay/PhonePe)</b> and approve the payment of ${amount}.<br><br><span style="color:#d83a3a; font-weight:bold;">Do not press back or close this screen.</span>`;
+        } else if (isCard) {
+            message = "🔒 Authenticating with your bank... Waiting for OTP verification.";
+        } else {
+            message = "🏦 Redirecting to your secure Net Banking portal...";
+        }
+
+        // 3. UI ko replace karke "Loading Screen" dikhao (Like Razorpay)
+        modalBody.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; animation: fadeIn 0.3s ease;">
+                <div style="width: 60px; height: 60px; border: 4px solid #f1f5f9; border-top: 4px solid #00D2FF; border-bottom: 4px solid #0A2463; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 25px;"></div>
+                
+                <h3 style="color: #0A2463; margin-bottom: 15px; font-family: 'Outfit';">Waiting for Confirmation</h3>
+                <p style="color: #64748b; font-size: 14px; line-height: 1.6; padding: 0 10px;">${message}</p>
+                
+                <div style="margin-top: 30px; background: #f8fafc; display: inline-block; padding: 8px 15px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                    <span style="font-size: 12px; color: #64748b; font-weight: 600;">Time remaining: <span id="fakeTimer" style="color: #0A2463;">04:59</span></span>
+                </div>
+            </div>
+        `;
+
+        // Spinner animation ke liye CSS dynamically add kar rahe hain
+        if (!document.getElementById('spinStyle')) {
+            document.head.insertAdjacentHTML('beforeend', '<style id="spinStyle">@keyframes spin { 100% { transform: rotate(360deg); } }</style>');
+        }
+
+        // 4. Fake Delay (4 seconds) - Jaise real life me lagta hai!
+        setTimeout(() => {
+            // 4 second baad backend ko request bhejo (Database me save karne ke liye)
+            fetch('/api/book_flight', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ flight_id: selectedFlightId, seat_pref: pref }) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    // Success Screen (Green Tick)
+                    modalBody.innerHTML = `
+                        <div style="text-align: center; padding: 50px 20px; animation: fadeIn 0.5s ease;">
+                            <div style="width: 80px; height: 80px; background: #dcfce7; color: #166534; font-size: 40px; line-height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center;">✓</div>
+                            <h2 style="color: #166534; margin-bottom: 10px; font-family: 'Outfit';">Payment Successful!</h2>
+                            <p style="color: #64748b; font-size: 15px;">${data.message}</p>
+                            <p style="font-size: 13px; margin-top: 30px; color: #94a3b8; font-weight: 600;">Redirecting to your tickets... ✈️</p>
+                        </div>
+                    `;
+                    // 2.5 second baad profile page par le jao
+                    setTimeout(() => { window.location.href = '/profile'; }, 2500);
+                } else {
+                    alert("Error: " + data.message);
+                    closePayment(); 
+                }
+            })
+            .catch(err => {
+                alert("Server error occurred!");
+                closePayment();
+            });
+        }, 4000); 
+    }
+
+    function switchTab(method) {
+        // Sab forms ko hide karo
+        document.querySelectorAll('.pay-section').forEach(s => s.style.display = 'none');
+        // Sab tabs se active design hatao
+        document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+        
+        // Jo click kiya hai use dikhao
+        document.getElementById(method + '-section').style.display = 'block';
+        document.getElementById('tab-' + method).classList.add('active');
+    }
+
+
+// ==========================================
+    // --- SEARCH FLIGHTS LOGIC ---
+    // ==========================================
+    function searchFlights() {
+        // Input fields se city ki value nikalna (Jo IDs humne abhi lagayi hain)
+        const from = document.getElementById('searchFrom').value;
+        const to = document.getElementById('searchTo').value;
+        
+        // Backend API ko call karna (Filters ke sath)
+        fetch(`/api/flights?origin=${from}&destination=${to}`)
+        .then(res => res.json())
+        .then(data => {
+            const grid = document.getElementById('flight-grid'); // Aapke screenshot wali ID
+            grid.innerHTML = ''; // Purani list ko clear karna
+            
+            // Agar us route ki koi flight nahi mili
+            if(data.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 50px;"><h3>No flights found for this route! ✈️</h3><p style="color: #666;">Try searching for different cities.</p></div>';
+                return;
+            }
+
+            // Nayi filtered flights ko screen par draw karna
+            data.forEach(flight => {
+                const dateObj = new Date(flight.departure_time);
+                const formattedDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                const formattedTime = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+                // Card banane ka code (Aapke Reserve Now popup ke sath)
+                const cardHTML = `
+                    <div class="deal-card" style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <div class="card-content" style="padding: 25px;">
+                            <div class="card-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="margin: 0; font-size: 24px; color: #0A2463;">${flight.destination}</h3>
+                                <span class="card-price" style="font-weight: bold; font-size: 18px; color: #333;">₹${flight.price}</span>
+                            </div>
+                            <div class="flight-details" style="color: #666; font-size: 14px; margin-bottom: 20px; line-height: 1.6;">
+                                Flight ${flight.flight_number} • ${flight.status}<br>
+                                From ${flight.origin}<br>
+                                📅 ${formattedDate} at 🕒 ${formattedTime}
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <button class="ai-btn" onclick="askAI('${flight.flight_number}', '${flight.origin}', '${flight.destination}', '${flight.departure_time}')" style="background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                    ✨ Ask AI Delay Predictor
+                                </button>
+                                <span id="result-${flight.flight_number}" style="display: block; margin-top: 5px; font-size: 12px;"></span>
+                            </div>
+
+                            <button onclick="openPayment(${flight.id}, ${flight.price})" style="width: 100%; background: #00c2cb; color: white; border: none; padding: 12px; border-radius: 25px; font-weight: 600; cursor: pointer;">
+                                Reserve Now
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHTML;
+            });
+        })
+        .catch(err => {
+            console.error("Search Fetch Error:", err);
+            alert("Oops! Something went wrong while searching.");
+        });
+    }
+
+    // --- BUDGET OPTIMIZER LOGIC ---
+
+    // Jab user slider hilye, toh text update ho
+    function updateBudgetText(val) {
+        document.getElementById('budgetValue').innerText = '₹' + val;
+    }
+
+    function findBudgetDeals() {
+        const maxPrice = document.getElementById('budgetSlider').value;
+        const grid = document.getElementById('budget-grid');
+        grid.innerHTML = '<p style="text-align:center; width:100%;">Finding best deals for you... ⏳</p>';
+
+        fetch(`/api/budget_deals?max_price=${maxPrice}`)
+        .then(res => res.json())
+        .then(data => {
+            grid.innerHTML = ''; 
+            
+            if(data.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 30px; background: white; border-radius: 16px;"><h3>No flights under ₹' + maxPrice + ' 😔</h3><p>Try increasing your budget.</p></div>';
+                return;
+            }
+
+            data.forEach(flight => {
+                const imgUrl = getDestinationImage(flight.destination);
+                
+                // Extra Value Tag for UI
+                const valueTag = `<span style="background: #2e7d32; color: white; font-size: 11px; padding: 4px 8px; border-radius: 12px; font-weight: bold; position: absolute; top: 15px; left: 15px; z-index: 10;">🔥 Best Value</span>`;
+
+                const cardHTML = `
+                    <div class="deal-card" style="position: relative; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 2px solid #e8f5e9;">
+                        ${valueTag}
+                        <img src="${imgUrl}" class="card-img" style="width: 100%; height: 180px; object-fit: cover;">
+                        <div class="card-content" style="padding: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0; font-size: 20px; color: #0A2463;">${flight.destination}</h3>
+                                <span style="font-weight: 800; font-size: 22px; color: #d83a3a;">₹${flight.price}</span>
+                            </div>
+                            <div style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                                Flight ${flight.flight_number} • From ${flight.origin}
+                            </div>
+                            <button onclick="openPayment(${flight.id}, ${flight.price})" style="width: 100%; background: #00c2cb; color: white; border: none; padding: 10px; border-radius: 20px; font-weight: 600; cursor: pointer;">
+                                Book Sasta Deal
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHTML;
+            });
+        });
+    }
+
+  
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatbotWindow');
+            chatWindow.style.display = chatWindow.style.display === 'none' || chatWindow.style.display === '' ? 'flex' : 'none';
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById('chatInput');
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            const chatMessages = document.getElementById('chatMessages');
+
+            // Add User Message
+            chatMessages.innerHTML += `<div style="background: #0A2463; color: white; padding: 12px 15px; border-radius: 15px; border-bottom-right-radius: 2px; max-width: 85%; font-size: 14px; align-self: flex-end; box-shadow: 0 4px 10px rgba(10,36,99,0.2);">${message}</div>`;
+            inputField.value = ''; 
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Add "Typing..." Indicator
+            const typingID = 'typing-' + Date.now();
+            chatMessages.innerHTML += `<div id="${typingID}" style="background: white; padding: 12px 15px; border-radius: 15px; border-bottom-left-radius: 2px; max-width: 85%; font-size: 14px; align-self: flex-start; color: #888; border: 1px solid #EBECEF;">SkyBot is typing...</div>`;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Fetch Reply from Python
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById(typingID).remove();
+                chatMessages.innerHTML += `<div style="background: white; padding: 12px 15px; border-radius: 15px; border-bottom-left-radius: 2px; max-width: 85%; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); color: #333; align-self: flex-start; border: 1px solid #EBECEF; line-height: 1.5;">${data.reply}</div>`;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
+        // --- REALISTIC LOGOUT LOGIC ---
+    function performRealisticLogout(event) {
+        // Agar tag <a> hai toh use turant doosre page par jane se roko
+        if(event) event.preventDefault(); 
+        
+        // Overlay ko screen par dikhao (flex use karenge taaki center mein aaye)
+        document.getElementById('logoutOverlay').style.display = 'flex';
+        
+        // 1.5 seconds ka professional delay
+        setTimeout(() => {
+            // Delay ke baad asli logout route par bhej do
+            // Note: Agar aapka logout route kuch aur hai (jaise /api/logout), toh use yahan likhein
+            window.location.href = '/logout'; 
+        }, 1500);
+    }
+
+    </script>
+
+    <div id="logoutOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
+        
+        <div style="width: 60px; height: 60px; border: 4px solid #f1f5f9; border-top: 4px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+        
+        <h2 style="color: #0A2463; font-family: 'Outfit'; margin-bottom: 10px;">Logging Out...</h2>
+        <p style="color: #64748b; font-size: 15px; font-weight: 500;">Securing your session and clearing data.</p>
+    </div>
+
+</body>
+</html>
