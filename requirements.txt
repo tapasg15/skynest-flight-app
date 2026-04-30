@@ -2,7 +2,7 @@ flask
 flask-cors
 google-generativeai
 mysql-connector-python
-scikit-learn==1.2.2
+scikit-learn==1.8.0
 pandas
 numpy
 joblib
