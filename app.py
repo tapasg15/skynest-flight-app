@@ -11,6 +11,14 @@ import string
 import numpy as np
 import os
 
+app = Flask(__name__)
+# SECURITY KEY: This encrypts the user's session cookies so they stay logged in securely.
+app.secret_key = 'super_secret_mca_project_key' 
+
+app.debug = True # Optional
+handler = app
+
+
 
 try:
     # Kyunki aapki dono .pkl files seedha main folder mein hain (app.py ke sath)
@@ -29,12 +37,6 @@ except Exception as e:
     ai_model = None
     encoders = None
 
-app = Flask(__name__)
-# SECURITY KEY: This encrypts the user's session cookies so they stay logged in securely.
-app.secret_key = 'super_secret_mca_project_key' 
-
-app.debug = True # Optional
-handler = app
 
 CURRENT_ENV = 'cloud' #agar cloud se chalana hai to 'cloud' likh do or db se to 'local'
 
