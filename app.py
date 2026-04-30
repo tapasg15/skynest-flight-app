@@ -563,7 +563,7 @@ def chat():
     try:
         # ATTEMPT 1: Try the Real Gemini AI
         response = client.models.generate_content(
-            model=genai.'gemini-2.5-flash',
+            model=genai.GenerativeModel'gemini-2.5-flash',
             contents=user_msg,
             config=types.GenerateContentConfig(
                 system_instruction=bot_personality,
