@@ -33,6 +33,9 @@ app = Flask(__name__)
 # SECURITY KEY: This encrypts the user's session cookies so they stay logged in securely.
 app.secret_key = 'super_secret_mca_project_key' 
 
+app.debug = True # Optional
+handler = app
+
 CURRENT_ENV = 'cloud' #agar cloud se chalana hai to 'cloud' likh do or db se to 'local'
 
 def get_db_connection():
