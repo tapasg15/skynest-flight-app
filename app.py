@@ -33,7 +33,7 @@ app = Flask(__name__)
 # SECURITY KEY: This encrypts the user's session cookies so they stay logged in securely.
 app.secret_key = 'super_secret_mca_project_key' 
 
-CURRENT_ENV = 'local' #agar cloud se chalana hai to 'cloud' likh do or db se to 'local'
+CURRENT_ENV = 'cloud' #agar cloud se chalana hai to 'cloud' likh do or db se to 'local'
 
 def get_db_connection():
     if CURRENT_ENV == 'cloud':
@@ -540,7 +540,7 @@ def update_status():
 # ==========================================
 
 # Initialize the new client with your API key
-client = genai.Client(api_key="AIzaSyAggNMzlLZdVWjYms91p4TiTgexMALgZ_E") 
+client = genai.configure(api_key="AIzaSyAggNMzlLZdVWjYms91p4TiTgexMALgZ_E") 
 
 bot_personality = """
 You are SkyBot, a highly polite and smart AI travel assistant for a flight booking website called 'SkyNest'. 
@@ -562,13 +562,12 @@ def chat():
 
     try:
         # ATTEMPT 1: Try the Real Gemini AI
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
+        response = client.models.generate_content(prompt)
+            model=genai.GenerativeModel('gemini-2.5-flash'),
             contents=user_msg,
             config=types.GenerateContentConfig(
                 system_instruction=bot_personality,
             )
-        )
         return jsonify({"reply": response.text})
         
     except Exception as e:
